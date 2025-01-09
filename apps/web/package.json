@@ -13,7 +13,11 @@
   },
   "dependencies": {
     "@next/bundle-analyzer": "^15.1.4",
+    "@opentelemetry/api-logs": "^0.57.0",
+    "@opentelemetry/instrumentation": "^0.57.0",
+    "@opentelemetry/sdk-logs": "^0.57.0",
     "@repo/ui": "*",
+    "@vercel/otel": "^1.10.0",
     "auth": "1.2.3",
     "cross-env": "^7.0.3",
     "next": "15.0.3",
