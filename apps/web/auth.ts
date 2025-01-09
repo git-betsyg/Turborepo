@@ -42,6 +42,8 @@ const providers: Provider[] = [
           return null;
         }
       }
+
+      return null;
     },
   }),
   GitHub,

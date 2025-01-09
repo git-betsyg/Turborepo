@@ -5,8 +5,9 @@ import { AuthError } from "next-auth"
 const SIGNIN_ERROR_URL='/error'
 
 export default async function SignInPage(props: {
-    searchParams: { callbackUrl: string | undefined }
+    searchParams: Promise<{ callbackUrl: string | undefined }>
 }) {
+    const searchParams = await props.searchParams;
     return (
         <div className="flex flex-col gap-2">
             <form
@@ -34,11 +35,12 @@ export default async function SignInPage(props: {
             </form>
             {Object.values(providerMap).map((provider) => (
                 <form
+                    key={provider.id}
                     action={async () => {
                         "use server"
                         try {
                             await signIn(provider.id, {
-                                redirectTo: props.searchParams?.callbackUrl ?? "",
+                                redirectTo: searchParams?.callbackUrl ?? "",
                             })
                         } catch (error) {
                             // Signin can fail for a number of reasons, such as the user
