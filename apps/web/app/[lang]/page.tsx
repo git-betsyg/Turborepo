@@ -23,7 +23,7 @@ const ThemeImage = (props: Props) => {
 export default async function Home({
   params,
 }: {
-  params: { lang: Locale };
+  params: Promise<{ lang: Locale }>;
 }) {
   const lang = (await params).lang;
   const dict = await getDictionary(lang)
