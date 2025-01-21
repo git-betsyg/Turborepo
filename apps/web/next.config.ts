@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 import createMDX from "@next/mdx";
+import remarkGfm from "remark-gfm";
+import rehypeKatex from "rehype-katex";
 
 const cspHeader = `
     default-src 'self';
@@ -43,10 +45,8 @@ const nextConfig: NextConfig = {
 const withMDX = createMDX({
   // Add markdown plugins here, as desired
   options: {
-    // @ts-expect-error
-    remarkPlugins: ["remark-gfm"],
-    // @ts-expect-error
-    rehypePlugins: [["rehype-katex", { strict: true, throwOnError: true }]],
+    remarkPlugins: [remarkGfm],
+    rehypePlugins: [[rehypeKatex, { strict: true, throwOnError: true }]],
   },
 });
 
