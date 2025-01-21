@@ -50,8 +50,12 @@ const withMDX = createMDX({
   },
 });
 
+const withPWA = require("next-pwa")({
+  dest: "public",
+});
+
 const withBundleAnalyzerConfig = withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
-export default withBundleAnalyzerConfig(withMDX(nextConfig));
+export default withMDX(withPWA(withBundleAnalyzerConfig(nextConfig)));
