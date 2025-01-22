@@ -53,7 +53,7 @@ export default async function RootLayout({
   return (
     <html lang={lang}>
       {/*todo GTM-ID*/}
-      <GoogleTagManager gtmId="GTM-XYZ" />
+      <GoogleTagManager gtmId="GTM-NQQ4N9BF" />
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         {children}
         <SpeedInsights />
