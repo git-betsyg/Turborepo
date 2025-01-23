@@ -4,6 +4,7 @@ import "../globals.css";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { Locale, locales } from "@/lib/locale";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import JotaiProvider from "./jotai-provider";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -55,7 +56,7 @@ export default async function RootLayout({
       {/*todo GTM-ID*/}
       <GoogleTagManager gtmId="GTM-NQQ4N9BF" />
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <JotaiProvider>{children}</JotaiProvider>
         <SpeedInsights />
       </body>
     </html>
