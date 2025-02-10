@@ -43,11 +43,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: '/api/auth/:path*',  // 排除 NextAuth.js 的 /api/auth 路径
-        destination: '/api/auth/:path*',  // 保持不变，不进行转发
-      },
-      {
-        source: '/api/:path*',  // 其他以 /api 开头的路径
+        source: '/api/:path*',  // 匹配以 /api 开头的路径
         destination: `${process.env.API_URL}/api/:path*`,  // 转发到实际的后台地址
       },
     ]
