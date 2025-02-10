@@ -44,7 +44,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',  // 匹配以 /api 开头的路径
-        destination: `${process.env.API_URL}/api/:path*`,  // 转发到实际的后台地址
+        destination: `http://192.168.20.70:8090/api/:path*`,  // 转发到实际的后台地址
       },
     ]
   },
