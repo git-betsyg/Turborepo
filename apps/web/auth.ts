@@ -17,7 +17,7 @@ declare module 'next-auth' {
 
 const nextAuthSecret = process.env.NEXTAUTH_SECRET;
 if (!nextAuthSecret) {
-  throw new Error('AUTH_SECRET is not set');
+  throw new Error('NEXTAUTH_SECRET is not set');
 }
 
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
