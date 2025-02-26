@@ -3,6 +3,9 @@ import { Button } from "@repo/ui/button";
 import styles from "./page.module.css";
 import {getDictionary} from "./dictionaries";
 import {Locale} from "@/lib/locale";
+import { ConnectButton } from "@/app/components/ConnectButton";
+import { SendTransaction } from '@/app/components/send-transaction'
+import { MintNFT } from "@/app/components/mint-nft";
 
 type Props = Omit<ImageProps, "src"> & {
   srcLight: string;
@@ -31,6 +34,9 @@ export default async function Home({
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <ConnectButton/>
+        <SendTransaction />
+        <MintNFT />
         <ThemeImage
           className={styles.logo}
           srcLight="turborepo-dark.svg"

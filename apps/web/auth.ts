@@ -1,99 +1,111 @@
-import NextAuth from "next-auth";
-import GitHub from "next-auth/providers/github";
-import { ZodError } from "zod";
-import Credentials from "next-auth/providers/credentials";
-import { signInSchema } from "./lib/zod";
-import type { Provider } from "next-auth/providers";
-import "next-auth/jwt";
+import NextAuth from 'next-auth';
+import credentialsProvider from 'next-auth/providers/credentials';
+import {
+  type SIWESession,
+  /* verifySignature, */
+  getChainIdFromMessage,
+  getAddressFromMessage
+} from '@reown/appkit-siwe'
+import { createPublicClient, http } from 'viem'
 
-const providers: Provider[] = [
-  Credentials({
-    // You can specify which fields should be submitted, by adding keys to the `credentials` object.
-    // e.g. domain, username, password, 2FA token, etc.
+declare module 'next-auth' {
+  interface Session extends SIWESession {
+    address: string;
+    chainId: number;
+  }
+}
+
+const nextAuthSecret = process.env.NEXTAUTH_SECRET;
+if (!nextAuthSecret) {
+  throw new Error('AUTH_SECRET is not set');
+}
+
+const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
+if (!projectId) {
+  throw new Error('NEXT_PUBLIC_PROJECT_ID is not set');
+}
+
+const providers = [
+  credentialsProvider({
+    name: 'Ethereum',
     credentials: {
-      email: {},
-      password: {},
+      message: {
+        label: 'Message',
+        type: 'text',
+        placeholder: '0x0',
+      },
+      signature: {
+        label: 'Signature',
+        type: 'text',
+        placeholder: '0x0',
+      },
     },
-    authorize: async (credentials) => {
+    async authorize(credentials) {
       try {
-        let user = null;
+        if (!credentials?.message) {
+          throw new Error('SiweMessage is undefined');
+        }
+        const { message, signature } = credentials;
+        const address = getAddressFromMessage(message as string);
+        const chainId = getChainIdFromMessage(message as string);
 
-        const { email, password } = await signInSchema.parseAsync(credentials);
+        // for the moment, the verifySignature is not working with social logins and emails  with non deployed smart accounts
+        /*  const isValid = await verifySignature({
+           address,
+           message,
+           signature,
+           chainId,
+           projectId,
+         }); */
+        // we are going to use https://viem.sh/docs/actions/public/verifyMessage.html
+        const publicClient = createPublicClient(
+          {
+            transport: http(
+              `https://rpc.walletconnect.org/v1/?chainId=${chainId}&projectId=${projectId}`
+            )
+          }
+        );
+        const isValid = await publicClient.verifyMessage({
+          message:message as string,
+          address: address as `0x${string}`,
+          signature: signature as `0x${string}`
+        });
+        // end o view verifyMessage
 
-        // todo
-        // logic to salt and hash password
-        // const pwHash = await bcrypt.hash(password, 10);
-
-        // todo
-        // logic to verify if the user exists
-        // user = await getUserFromDb(email, pwHash)
-
-        if (!user) {
-          // No user found, so this is their first attempt to login
-          // Optionally, this is also the place you could do a user registration
-          throw new Error("Invalid credentials.");
+        if (isValid) {
+          return {
+            id: `${chainId}:${address}`,
+          };
         }
 
-        // return user object with their profile data
-        return user;
-      } catch (error) {
-        if (error instanceof ZodError) {
-          // Return `null` to indicate that the credentials are invalid
-          return null;
-        }
+        return null;
+      } catch (e) {
+        return null;
       }
-
-      return null;
     },
   }),
-  GitHub,
 ];
 
-export const providerMap = providers
-  .map((provider) => {
-    if (typeof provider === "function") {
-      const providerData = provider();
-      return { id: providerData.id, name: providerData.name };
-    } else {
-      return { id: provider.id, name: provider.name };
-    }
-  })
-  .filter((provider) => provider.id !== "credentials");
-
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const handler = NextAuth({
+  // https://next-auth.js.org/configuration/providers/oauth
+  secret: nextAuthSecret,
   providers,
-  pages: {
-    signIn: "/signin",
-    error: "/error",
+  session: {
+    strategy: 'jwt',
   },
   callbacks: {
-    authorized: async ({ auth }) => {
-      // Logged in users are authenticated, otherwise redirect to login page
-      return !!auth;
-    },
-    jwt({ token, trigger, session, account }) {
-      if (trigger === "update") token.name = session.user.name;
-      if (account?.provider === "github") {
-        return { ...token, accessToken: account.access_token };
+    session({ session, token }) {
+      if (!token.sub) {
+        return session;
       }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token?.accessToken) session.accessToken = token.accessToken;
+
+      const [, chainId, address] = token.sub.split(':');
+      if (chainId && address) {
+        session.address = address;
+        session.chainId = parseInt(chainId, 10);
+      }
 
       return session;
     },
   },
 });
-
-declare module "next-auth" {
-  interface Session {
-    accessToken?: string;
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    accessToken?: string;
-  }
-}

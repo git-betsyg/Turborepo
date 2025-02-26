@@ -4,7 +4,7 @@ import createMDX from "@next/mdx";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 
-const cspHeader = `
+/*const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com;
     style-src 'self' 'unsafe-inline';
@@ -15,9 +15,13 @@ const cspHeader = `
     form-action 'self';
     frame-ancestors 'none';
     upgrade-insecure-requests;
-`;
+`;*/
 
 const nextConfig: NextConfig = {
+  webpack: config => {
+    config.externals.push('pino-pretty', 'lokijs', 'encoding')
+    return config
+  },
   /* config options here */
   // 优化包导入
   experimental: {
@@ -27,7 +31,8 @@ const nextConfig: NextConfig = {
   serverExternalPackages: [],
   // Configure `pageExtensions` to include markdown and MDX files
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
-  async headers() {
+  // 暂时隐藏 CSP 安全策略
+  /*async headers() {
     return [
       {
         source: "/(.*)",
@@ -39,7 +44,7 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
-  },
+  },*/
 };
 
 const withMDX = createMDX({

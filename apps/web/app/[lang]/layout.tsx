@@ -7,6 +7,12 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import JotaiProvider from "./jotai-provider";
 import ReactQueryProvider from "./react-query-provider";
 import StoreProvider from "./store-provider";
+import AppkitProvider from "./appkit-provider";
+import { headers } from "next/headers";
+
+import { cookieToInitialState } from 'wagmi';
+
+import { wagmiAdapter } from '@/lib/appkit';
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -53,6 +59,7 @@ export default async function RootLayout({
   params: Promise<{ lang: Locale }>;
 }>) {
   const lang = (await params).lang;
+  const initialState = cookieToInitialState(wagmiAdapter.wagmiConfig, (await headers()).get('cookie'));
   return (
     <html lang={lang}>
       {/*todo GTM-ID*/}
@@ -60,7 +67,9 @@ export default async function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <StoreProvider>
           <JotaiProvider>
-            <ReactQueryProvider>{children}</ReactQueryProvider>
+            <ReactQueryProvider>
+              <AppkitProvider initialState={initialState}>{children}</AppkitProvider>
+            </ReactQueryProvider>
           </JotaiProvider>
         </StoreProvider>
         <SpeedInsights />
